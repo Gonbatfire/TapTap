@@ -22,9 +22,6 @@ class TapTapTapRT(
     }
 
     override fun checkDoubleTapTiming(timestamp: Long): Int {
-        if (!isTripleTapEnabled) {
-            return super.checkDoubleTapTiming(timestamp)
-        }
         val firstPassIterator = _tBackTapTimestamps.iterator()
         while (firstPassIterator.hasNext()) {
             val pastTimestamp = firstPassIterator.next()
@@ -49,8 +46,13 @@ class TapTapTapRT(
             tapCount++
         }
 
-        if (tapCount == 1 || timeNow.minus(_tBackTapTimestamps.first()) > mMaxTimeGapTripleNs) {
+        if (tapCount >= 3 || timeNow.minus(_tBackTapTimestamps.first()) > mMaxTimeGapTripleNs) {
             _tBackTapTimestamps.clear()
+            if (tapCount == 1) {
+                return 2
+            } else if (tapCount >= 2) {
+                return 3
+            }
         }
 
         return 1
